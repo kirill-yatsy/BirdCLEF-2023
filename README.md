@@ -1,2 +1,2 @@
 # vesuvius-challenge-ink-detection
-https://www.kaggle.com/competitions/vesuvius-challenge-ink-detection/overview
+https://www.kaggle.com/competitions/birdclef-2023
