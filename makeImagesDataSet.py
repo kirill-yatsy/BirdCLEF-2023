@@ -36,6 +36,22 @@ class TrainAudioDataset(Dataset):
 
 dataSet = TrainAudioDataset()
 batch_size = 1
+n_fft = 1024
+win_length = None
+hop_length = 512
+n_mels = 128
+audio_spectogram = torchaudio.transforms.MelSpectrogram(
+    sample_rate=32000,
+    n_fft=n_fft,
+    win_length=win_length,
+    hop_length=hop_length,
+    pad_mode="reflect", 
+    power=2.0, 
+    norm='slaney',
+    mel_scale="htk",
+    center=True,
+).cuda()
+
 
 class DataProcessing: 
     @staticmethod
@@ -60,32 +76,17 @@ class DataProcessing:
                     labels.append(label) 
         return [frames, labels]
     
-    # @staticmethod
-    # def melgram_v1(audio_file_path, to_file):
-    #     sig, fs = librosa.load(audio_file_path)
-        
-    #     plt.figure(figsize=(3,2))
-    #     plt.axis('off')  # no axis
-    #     plt.axes([0., 0., 1., 1.], frameon=False, xticks=[], yticks=[])  # Remove the white edge
-    #     S = librosa.feature.melspectrogram(y=sig, sr=32000)
-       
-    #     height = S.shape[0]  
-    #     image_cropped = S[int(height*0.25  ):int(height*0.75 ),:]
-    #     librosa.display.specshow(librosa.power_to_db(image_cropped, ref=np.max))
-    #     plt.savefig(to_file, bbox_inches=None, pad_inches=0)
-    #     plt.close()
-    
     @staticmethod
-    def melgram_v2(audio, sample_rate,  to_file):
-         
-        plt.figure(figsize=(3,2))
+    def melgram_v2(audio, to_file):
+    
+        plt.figure(figsize=(4.9,2))
         plt.axis('off')  # no axis
         plt.axes([0., 0., 1., 1.], frameon=False, xticks=[], yticks=[])  # Remove the white edge
-        melspectrogram = librosa.feature.melspectrogram(y=audio, sr=sample_rate)
+        melspectrogram = audio_spectogram(audio)
        
         # height = S.shape[0]  
         # image_cropped = S[int(height*0.2  ):int(height*0.8 ),:]
-        librosa.display.specshow(librosa.power_to_db(melspectrogram, ref=np.max))
+        plt.imshow(melspectrogram.repeat(3, 1, 1).log2()[0,:,:].cpu().numpy() )
         plt.savefig(to_file, bbox_inches=None, pad_inches=0)
         plt.close()
 
@@ -100,15 +101,15 @@ for batch, (X, y) in tqdm(enumerate(dataLoader), total=len(dataLoader), leave=Fa
         label = y[x] 
         (frame, sample_rate, name) = X[x]
         Path(f'./data/train_melspectrogram/{label}/').mkdir(parents=True, exist_ok=True)
-        DataProcessing.melgram_v2(frame.cpu().numpy(), sample_rate, f'./data/train_melspectrogram/{label}/{name}.png')
+        DataProcessing.melgram_v2(frame,  f'./data/train_melspectrogram/{label}/{name}.png')
         
 
 
 # item = next(iter(dataLoader))
-# (frame, sample_rate) = item[0][0]
-# print(frame.size(), sample_rate)
+# (frame, sample_rate, name) = item[0][0]
+# # print(frame.size(), sample_rate)
 
-# DataProcessing.melgram_v2(frame.numpy(), sample_rate, './qqqqqq.png')
+# DataProcessing.melgram_v2(frame, './qqqqqq.png')
 
 # class SpectogrammProvider:
 #     def __init__(self, dataProvider: DataProvider):
