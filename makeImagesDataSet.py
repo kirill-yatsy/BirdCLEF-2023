@@ -17,7 +17,7 @@ class TrainAudioDataset(Dataset):
     def __init__(self):
         # class_names = sorted(os.listdir('./data/train_audio/'))
         # class_names_dic = {class_names[i]: i for i in range(0, len(class_names))}
-        paths = glob.glob("./data/train_audio/**/*.ogg")
+        paths = glob.glob("./data/test_soundscapes/**/*.ogg")
 
         df = pd.DataFrame(data={'x': paths, 'y': [x.split('\\')[-2] for x in paths], 'name': [x.split('\\')[-1] for x in paths]})
         df['y'] = df['y'].astype('category')
@@ -99,8 +99,8 @@ for batch, (X, y) in tqdm(enumerate(dataLoader), total=len(dataLoader), leave=Fa
     for x in range(0, len(X)):
         label = y[x] 
         (frame, sample_rate, name) = X[x]
-        Path(f'./data/train_melspectrogram/{label}/').mkdir(parents=True, exist_ok=True)
-        DataProcessing.melgram_v2(frame.cpu().numpy(), sample_rate, f'./data/train_melspectrogram/{label}/{name}.png')
+        Path(f'./data/test_melspectrogram/{label}/').mkdir(parents=True, exist_ok=True)
+        DataProcessing.melgram_v2(frame.cpu().numpy(), sample_rate, f'./data/test_melspectrogram/{label}/{name}.png')
         
 
 
